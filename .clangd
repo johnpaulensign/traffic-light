@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - -D__XTENSA__
+  Remove:
+    - -mlongcalls
+    - -fno-tree-switch-conversion
+    - -fstrict-volatile-bitfields

@@ -1,0 +1,319 @@
+### ESP32 LED Ring API Test Requests
+### Replace {{host}} with your ESP32 IP (e.g., http://192.168.1.241)
+
+@host = http://192.168.1.241
+
+### ==================== GET Endpoints ====================
+
+### Get current status
+GET {{host}}/status
+
+###
+
+### Get available animations
+GET {{host}}/animations
+
+### ==================== Animation Control ====================
+
+### Set animation to solid
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "solid"}
+
+###
+
+### Set animation to fade
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "fade"}
+
+###
+
+### Set animation to strobe
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "strobe"}
+
+###
+
+### Set animation to spin
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "spin"}
+
+###
+
+### Set animation to spinTail
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "spinTail"}
+
+### ==================== Color Control ====================
+
+### Set color to RED
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#FF0000"}
+
+###
+
+### Set color to GREEN
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#00FF00"}
+
+###
+
+### Set color to YELLOW/ORANGE
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#FF9600"}
+
+###
+
+### Set color to BLUE
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#0000FF"}
+
+###
+
+### Set color to WHITE
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#FFFFFF"}
+
+### ==================== Power Control ====================
+
+### Turn ON
+POST {{host}}/power
+Content-Type: application/json
+
+{"on": true}
+
+###
+
+### Turn OFF
+POST {{host}}/power
+Content-Type: application/json
+
+{"on": false}
+
+### ==================== Brightness Control ====================
+
+### Set brightness to MAX (255)
+POST {{host}}/brightness
+Content-Type: application/json
+
+{"value": 255}
+
+###
+
+### Set brightness to MEDIUM (128)
+POST {{host}}/brightness
+Content-Type: application/json
+
+{"value": 128}
+
+###
+
+### Set brightness to LOW (50)
+POST {{host}}/brightness
+Content-Type: application/json
+
+{"value": 30}
+
+### ==================== Animation Parameters ====================
+
+### Set animation speed (ms per step)
+POST {{host}}/speed
+Content-Type: application/json
+
+{"value": 40}
+
+###
+
+### Set strobe period (ms for full on+off cycle)
+POST {{host}}/strobe
+Content-Type: application/json
+
+{"value": 100}
+
+###
+
+### Set tail length for spinTail (1-12)
+POST {{host}}/tail
+Content-Type: application/json
+
+{"value": 12}
+
+### ==================== Per-Pixel Control ====================
+
+### Set single pixel (position 0 = first LED)
+POST {{host}}/pixel
+Content-Type: application/json
+
+{"position": 0, "rgb": "#FF0000"}
+
+###
+
+### Set single pixel (position 1)
+POST {{host}}/pixel
+Content-Type: application/json
+
+{"position": 1, "rgb": "#00FF00"}
+
+###
+
+### Set single pixel (position 2)
+POST {{host}}/pixel
+Content-Type: application/json
+
+{"position": 2, "rgb": "#0000FF"}
+
+###
+
+### Set multiple pixels at once (array format)
+POST {{host}}/pixels
+Content-Type: application/json
+
+[
+  {"position": 0, "rgb": "#FF0000"},
+  {"position": 1, "rgb": "#00FF00"},
+  {"position": 2, "rgb": "#0000FF"}
+]
+
+###
+
+### Set multiple pixels at once (object format)
+POST {{host}}/pixels
+Content-Type: application/json
+
+{
+  "pixels": [
+    {"position": 0, "rgb": "#FFFFFF"},
+    {"position": 1, "rgb": "#FF9600"},
+    {"position": 2, "rgb": "#00FFFF"}
+  ]
+}
+
+###
+
+### Rainbow pattern (all pixels different colors)
+POST {{host}}/pixels
+Content-Type: application/json
+
+[
+  {"position": 0, "rgb": "#FF0000"},
+  {"position": 1, "rgb": "#FF7F00"},
+  {"position": 2, "rgb": "#FFFF00"}
+]
+
+###
+
+### All pixels same color (red)
+POST {{host}}/pixels
+Content-Type: application/json
+
+[
+  {"position": 0, "rgb": "#FF0000"},
+  {"position": 1, "rgb": "#FF0000"},
+  {"position": 2, "rgb": "#FF0000"}
+]
+
+###
+
+### Clear all pixels (set to black)
+POST {{host}}/pixels
+Content-Type: application/json
+
+[
+  {"position": 0, "rgb": "#000000"},
+  {"position": 1, "rgb": "#000000"},
+  {"position": 2, "rgb": "#000000"}
+]
+
+### ==================== Combined Effect Tests ====================
+
+### Test: Red Strobe (like busy status)
+# 1. Set color red
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#FF0000"}
+
+###
+
+# 2. Set strobe period
+POST {{host}}/strobe
+Content-Type: application/json
+
+{"value": 100}
+
+###
+
+# 3. Activate strobe animation
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "strobe"}
+
+###
+
+### Test: Solid Red (after strobe)
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "solid"}
+
+###
+
+### Test: Yellow Fade (like away status)
+# 1. Set color yellow/orange
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#FF9600"}
+
+###
+
+# 2. Set fade speed
+POST {{host}}/speed
+Content-Type: application/json
+
+{"value": 40}
+
+###
+
+# 3. Activate fade animation
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "fade"}
+
+###
+
+### Test: Solid Green (like available status)
+# 1. Set color green
+POST {{host}}/color
+Content-Type: application/json
+
+{"rgb": "#00FF00"}
+
+###
+
+# 2. Activate solid animation
+POST {{host}}/animation
+Content-Type: application/json
+
+{"name": "solid"}

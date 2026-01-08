@@ -1,0 +1,8 @@
+{
+  "client_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "tenant_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "esp32_host": "http://xxx.xxx.xxx.xxx",
+  "mode": "trafficlight",
+  "brightness": 255,
+  "refresh_interval_seconds": 20
+}
