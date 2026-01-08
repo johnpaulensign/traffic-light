@@ -6,3 +6,4 @@
 .cache/
 token_cache.bin
 __pycache__
+server/settings.json
