@@ -18,14 +18,24 @@ enum class Presence {
 
 enum class EffectType {
     Solid,
+    Pixel,
+    StrobeThenPixel,
     Fade,
     StrobeThenSolid,
     Off
 };
 
+enum class TrafficLightState {
+    Bottom,
+    Middle,
+    Top,
+    All
+};
+
 struct PresenceEffect {
     EffectType type;
     uint32_t color;
+    TrafficLightState trafficLight;
 };
 
 class TeamsPresence {

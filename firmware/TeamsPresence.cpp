@@ -27,11 +27,30 @@ bool TeamsPresence::fetchPresence() {
     
     int httpCode = http.GET();
     
+    // Handle 401 - try to refresh token and retry once
+    if (httpCode == 401) {
+        Serial.println("[Presence] Got 401, attempting token refresh...");
+        http.end();
+        
+        if (_auth.refreshAccessToken()) {
+            // Retry with new token
+            String newToken = _auth.getAccessToken();
+            if (newToken.length() == 0) {
+                Serial.println("[Presence] No token after refresh");
+                return false;
+            }
+            
+            http.begin(client, GRAPH_PRESENCE_ENDPOINT);
+            http.addHeader("Authorization", "Bearer " + newToken);
+            httpCode = http.GET();
+        } else {
+            Serial.println("[Presence] Token refresh failed");
+            return false;
+        }
+    }
+    
     if (httpCode != 200) {
         Serial.printf("[Presence] Request failed: %d\n", httpCode);
-        if (httpCode == 401) {
-            Serial.println("[Presence] Token may be expired");
-        }
         http.end();
         return false;
     }
@@ -89,23 +108,23 @@ PresenceEffect TeamsPresence::getEffect() const {
 PresenceEffect TeamsPresence::mapPresenceToEffect(Presence presence) {
     switch (presence) {
         case Presence::Available:
-            return {EffectType::Solid, 0x00FF00};  // Green
+            return {EffectType::Solid, 0x00FF00, TrafficLightState::Top};  // Green
             
         case Presence::Away:
         case Presence::BeRightBack:
-            return {EffectType::Fade, 0xFF9600};  // Orange/Yellow
+            return {EffectType::Fade, 0xFF9600, TrafficLightState::Middle};  // Orange/Yellow
             
         case Presence::Busy:
         case Presence::DoNotDisturb:
         case Presence::InACall:
         case Presence::InAMeeting:
         case Presence::Presenting:
-            return {EffectType::StrobeThenSolid, 0xFF0000};  // Red
+            return {EffectType::StrobeThenSolid, 0xFF0000, TrafficLightState::Bottom};  // Red
             
         case Presence::Offline:
-            return {EffectType::Off, 0x000000};
+            return {EffectType::Fade, 0xFF0000, TrafficLightState::All};
             
         default:
-            return {EffectType::Solid, 0x0000FF};  // Blue for unknown
+            return {EffectType::Solid, 0x0000FF, TrafficLightState::All};  // Blue for unknown
     }
 }

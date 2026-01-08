@@ -40,6 +40,7 @@ bool authInProgress = false;
 Presence lastPresence = Presence::Unknown;
 unsigned long strobeStartTime = 0;
 bool inStrobePhase = false;
+String strobeThen = "";
 
 // Animation instances
 FadeAnimation fadeAnim;
@@ -190,17 +191,55 @@ void loop() {
                     // Apply the effect
                     appState.primaryColor = effect.color;
                     
+                    // Clear all pixels first
+                    for (int i = 0; i < Config::NUM_PIXELS; i++) {
+                        appState.pixelColors[i] = 0x000000;
+                    }
+
+                    // Light only the relevant LED(s)
+                    switch (effect.trafficLight) {
+                        case TrafficLightState::Bottom:
+                            appState.pixelColors[0] = effect.color;
+                            effect.type = EffectType::StrobeThenPixel;
+                            break;
+                        case TrafficLightState::Middle:
+                            appState.pixelColors[1] = effect.color;
+                            effect.type = EffectType::Pixel;
+                            break;
+                        case TrafficLightState::Top:
+                            appState.pixelColors[2] = effect.color;
+                            effect.type = EffectType::Pixel;
+                            break;
+                        case TrafficLightState::All:
+                            for (int i = 0; i < Config::NUM_PIXELS; i++) {
+                                appState.pixelColors[i] = effect.color;
+                            }
+                            break;
+                    }
+
                     switch (effect.type) {
                         case EffectType::Solid:
                             Commands::setAnimation(appState, animMgr, "solid");
+                            break;
+                        case EffectType::Pixel:
+                            Commands::setAnimation(appState, animMgr, "pixels");
+                            break;
+                        case EffectType::StrobeThenPixel:
+                            Serial.println("Starting strobe -> pixels");
+                            Commands::setAnimation(appState, animMgr, "strobe");
+                            strobeStartTime = nowMs;
+                            inStrobePhase = true;
+                            strobeThen = "pixels";
                             break;
                         case EffectType::Fade:
                             Commands::setAnimation(appState, animMgr, "fade");
                             break;
                         case EffectType::StrobeThenSolid:
+                            Serial.println("Starting strobe -> solid");
                             Commands::setAnimation(appState, animMgr, "strobe");
                             strobeStartTime = nowMs;
                             inStrobePhase = true;
+                            strobeThen = "solid";
                             break;
                         case EffectType::Off:
                             appState.powerOn = false;
@@ -208,7 +247,7 @@ void loop() {
                             ledRing.show();
                             break;
                     }
-                    
+
                     // Ensure power is on for non-off effects
                     if (effect.type != EffectType::Off) {
                         appState.powerOn = true;
@@ -226,8 +265,7 @@ void loop() {
     
     // Handle strobe -> solid transition
     if (inStrobePhase && (nowMs - strobeStartTime >= Config::STROBE_DURATION_MS)) {
-        Serial.println("Strobe phase complete, switching to solid");
-        Commands::setAnimation(appState, animMgr, "solid");
+        Commands::setAnimation(appState, animMgr, strobeThen);
         inStrobePhase = false;
     }
 

@@ -152,15 +152,21 @@ bool MicrosoftAuth::pollForToken() {
     http.begin(client, buildTokenEndpoint());
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
     
-    String body = "grant_type=urn:ietf:params:oauth:grant-type:device_code";
+    String body = "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code";
     body += "&client_id=" + String(_clientId);
     body += "&device_code=" + _deviceCode.deviceCode;
     
     int httpCode = http.POST(body);
     String response = http.getString();
+    
+    // Debug: print the response for troubleshooting
+    if (httpCode != 200) {
+        Serial.printf("[Auth] Token poll response (%d): %s\n", httpCode, response.c_str());
+    }
+    
     http.end();
     
-    DynamicJsonDocument doc(2048);
+    DynamicJsonDocument doc(6144);  // Token response can be ~4KB with JWTs
     DeserializationError error = deserializeJson(doc, response);
     if (error) {
         Serial.printf("[Auth] JSON parse error: %s\n", error.c_str());
@@ -227,7 +233,7 @@ bool MicrosoftAuth::refreshAccessToken() {
         return false;
     }
     
-    DynamicJsonDocument doc(2048);
+    DynamicJsonDocument doc(6144);  // Token response can be ~4KB with JWTs
     DeserializationError error = deserializeJson(doc, response);
     if (error) {
         Serial.printf("[Auth] JSON parse error: %s\n", error.c_str());

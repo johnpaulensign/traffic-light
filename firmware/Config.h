@@ -13,8 +13,8 @@ namespace Config {
     constexpr const char* MS_TENANT_ID = "YOUR_TENANT_ID_HERE";
     
     // Presence polling interval in milliseconds
-    constexpr unsigned long PRESENCE_POLL_INTERVAL_MS = 60000;  // 60 seconds
+    constexpr unsigned long PRESENCE_POLL_INTERVAL_MS = 15000;  // 15 seconds
     
     // Strobe duration before transitioning to solid (milliseconds)
-    constexpr unsigned long STROBE_DURATION_MS = 1000;
+    constexpr unsigned long STROBE_DURATION_MS = 3500;
 }
